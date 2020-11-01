@@ -1,9 +1,8 @@
 package com.addbook.jdbc;
 
-import java.util.List;
 
-import com.capgemini.addressbook.AddressBookDBService;
-import com.capgemini.addressbook.Contact;
+import java.time.LocalDate;
+import java.util.List;
 
 public class AddressBookService {
 	private List<Contact> contactList;
@@ -38,6 +37,10 @@ public class AddressBookService {
 	public boolean checkContactDetailsInSyncWithDB(String name) {
 		List<Contact> contactList = addressBookDBService.getcontactData(name);
 		return contactList.get(0).equals(getContactData(name));
+	}
+	public List<Contact> readContactDataForDateRange(LocalDate startDate, LocalDate endDate) {
+		this.contactList = addressBookDBService.getContactForDateRange(startDate, endDate);
+		return contactList;
 	}
 	
 }

@@ -1,5 +1,4 @@
 package com.addbook.jdbc;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Writer;
@@ -8,7 +7,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.capgemini.addressbook.Contact;
 import com.opencsv.CSVReader;
 import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;

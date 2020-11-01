@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.capgemini.addressbook.Contact;
 import com.google.gson.Gson;
 
 public class AddressBookJson {

@@ -1,14 +1,15 @@
 package com.addbook.jdbc;
 
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-
-import com.capgemini.addressbook.Contact;
 
 public class AddressBookDBService {
 	private PreparedStatement ContactDataStatement;
@@ -36,10 +37,10 @@ public class AddressBookDBService {
 	}
 
 	public List<Contact> readData() {
-		String sql = "\"SELECT contacts.first_name, contacts.last_name,contacts.address_book_name,contacts.address,contacts.city,\"\r\n"
-				+ "					+ \"contacts.state,contacts.zip,contacts.phone_number,contacts.email,address_book_name_and_type.Address_book_type \"\r\n"
-				+ "					+ \" from contacts inner join address_book_name_and_type \"\r\n"
-				+ "					+ \" on contacts.address_book_name=address_book_name_and_type.Address_book_name WHERE firstName=?";
+		String sql = "SELECT c.first_name, c.last_name,c.address_book_name,c.address,c.city,"
+				+ "c.state,c.zip,c.phone_number,c.email,abd.address_book_type "
+				+ "from contact_details c inner join address_book_dict abd "
+				+ "on c.address_book_name=abd.address_book_name; ";
 		return this.getContactDetailsUsingSqlQuery(sql);
 	}
 
@@ -77,7 +78,7 @@ public class AddressBookDBService {
 		}
 		return contactList;
 	}
-	
+
 	public int updateEmployeeData(String name, String address) {
 		return this.updateContactDataUsingPreparedStatement(name, address);
 	}
@@ -109,18 +110,26 @@ public class AddressBookDBService {
 		}
 		return contactList;
 	}
-	
+
 	private void prepareStatementForContactData() {
 		try {
 			Connection connection = addressBookDBService.getConnection();
-			String sql = "SELECT contacts.first_name, contacts.last_name,contacts.address_book_name,contacts.address,contacts.city,"
-					+ "contacts.state,contacts.zip,contacts.phone_number,contacts.email,address_book_name_and_type.Address_book_type "
-					+ " from contacts inner join address_book_name_and_type "
-					+ " on contacts.address_book_name=address_book_name_and_type.Address_book_name WHERE firstName=?; ";
+			String sql = "SELECT contacts.first_name, contacts.last_name,contacts.address_book_name,contacts.address,c.city,"
+					+ "contacts.state,contacts.zip,contacts.phone_number,contacts.email,address_book_name_and_type.address_book_type "
+					+ "from contacts  inner join address_book_name_and_type "
+					+ "on contacts.Address_book_name=address_book_name_and_type.Address_book_name; ";
 			ContactDataStatement = connection.prepareStatement(sql);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
+	public List<Contact> getContactForDateRange(LocalDate startDate, LocalDate endDate) {
+		String sql = String.format( "SELECT contacts.first_name, contacts.last_name,contacts.address_book_name,contacts.address,c.city,"
+						+ "contacts.state,contacts.zip,contacts.phone_number,contacts.email,address_book_name_and_type.address_book_type "
+						+ "from contacts  inner join address_book_name_and_type "
+						+ "on contacts.Address_book_name=address_book_name_and_type.Address_book_name; ",
+				startDate,endDate);
+		return this.getContactDetailsUsingSqlQuery(sql);
+	}
 }

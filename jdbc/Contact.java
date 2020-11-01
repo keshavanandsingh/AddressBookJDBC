@@ -1,9 +1,9 @@
 package com.addbook.jdbc;
 
 public class Contact {
-	private String firstName;
+	String firstName;
 	private String lastName;
-	private String address;
+	String address;
 	private String city;
 	private String state;
 	private String zip;

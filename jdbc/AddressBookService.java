@@ -22,7 +22,6 @@ public class AddressBookService {
 		this.contactList = addressBookDBService.readData();
 		return contactList;
 	}
-
 	public void updateContactDetails(String name, String address) {
 		int result = addressBookDBService.updateEmployeeData(name, address);
 		if (result == 0)
@@ -40,5 +39,5 @@ public class AddressBookService {
 		List<Contact> contactList = addressBookDBService.getcontactData(name);
 		return contactList.get(0).equals(getContactData(name));
 	}
-
+	
 }

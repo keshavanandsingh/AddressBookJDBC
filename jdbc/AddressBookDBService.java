@@ -17,7 +17,7 @@ public class AddressBookDBService {
 	private AddressBookDBService() {
 	}
 
-	public static AddressBookDBService getInstance() {
+	static AddressBookDBService getInstance() {
 		if (addressBookDBService == null) {
 			addressBookDBService = new AddressBookDBService();
 		}
@@ -25,7 +25,7 @@ public class AddressBookDBService {
 	}
 
 	public Connection getConnection() throws SQLException {
-		String jdbcURL = "jdbc:mysql://localhost:3306/address_book_service";
+		String jdbcURL = "jdbc:mysql://localhost:3306/address_book_service?useSSL=false";
 		String userName = "root";
 		String password = "Sreeja6shreya$";
 		Connection connection;
@@ -36,10 +36,10 @@ public class AddressBookDBService {
 	}
 
 	public List<Contact> readData() {
-		String sql = "SELECT contacts.first_name, contacts.last_name,contacts.address_book_name,contacts.address,c.city,"
-				+ "contacts.state,contacts.zip,contacts.phone_number,contacts.email,address_book_name_and_type.address_book_type "
-				+ "from contacts  inner join address_book_name_and_type "
-				+ "on contacts.Address_book_name=address_book_name_and_type.Address_book_name; ";
+		String sql = "\"SELECT contacts.first_name, contacts.last_name,contacts.address_book_name,contacts.address,contacts.city,\"\r\n"
+				+ "					+ \"contacts.state,contacts.zip,contacts.phone_number,contacts.email,address_book_name_and_type.Address_book_type \"\r\n"
+				+ "					+ \" from contacts inner join address_book_name_and_type \"\r\n"
+				+ "					+ \" on contacts.address_book_name=address_book_name_and_type.Address_book_name WHERE firstName=?";
 		return this.getContactDetailsUsingSqlQuery(sql);
 	}
 
@@ -113,13 +113,14 @@ public class AddressBookDBService {
 	private void prepareStatementForContactData() {
 		try {
 			Connection connection = addressBookDBService.getConnection();
-			String sql = "SELECT contacts.first_name, contacts.last_name,contacts.address_book_name,contacts.address,c.city,"
-					+ "contacts.state,contacts.zip,contacts.phone_number,contacts.email,address_book_name_and_type.address_book_type "
-					+ "from contacts  inner join address_book_name_and_type "
-					+ "on contacts.Address_book_name=address_book_name_and_type.Address_book_name; ";
+			String sql = "SELECT contacts.first_name, contacts.last_name,contacts.address_book_name,contacts.address,contacts.city,"
+					+ "contacts.state,contacts.zip,contacts.phone_number,contacts.email,address_book_name_and_type.Address_book_type "
+					+ " from contacts inner join address_book_name_and_type "
+					+ " on contacts.address_book_name=address_book_name_and_type.Address_book_name WHERE firstName=?; ";
 			ContactDataStatement = connection.prepareStatement(sql);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
+	
 }

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 public class AddressBookDBService {
+	private static final String phone = null;
 	private PreparedStatement ContactDataStatement;
 	private static AddressBookDBService addressBookDBService;
 
@@ -28,7 +29,7 @@ public class AddressBookDBService {
 		return addressBookDBService;
 	}
 
-	public Connection getConnection() throws SQLException {
+	public static Connection getConnection() throws SQLException {
 		String jdbcURL = "jdbc:mysql://localhost:3306/address_book_service?useSSL=false";
 		String userName = "root";
 		String password = "Sreeja6shreya$";
@@ -152,4 +153,40 @@ public class AddressBookDBService {
 		}
 		return contactByCityMap;
 	}
+
+	public Contact addContact(String firstName, String lastName, String address, String city, String state, String zip,
+			String phoneNumber, String email, String addressBookName, String addressBookType, LocalDate date) {
+		String sql = String.format(
+				"INSERT INTO contacts (first_name,last_name,address,city,state,zip,phone_number,email) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s');",
+				date, firstName, lastName, address, city, state, zip, phoneNumber, email);
+		Contact contact = null;
+		try (Connection connection = getConnection()) {
+			PreparedStatement preparedStatement = connection.prepareStatement(sql);
+			int result = preparedStatement.executeUpdate();
+			if (result == 1)
+				contact = new Contact(firstName, lastName, address, city, state, zip, phoneNumber, email);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return contact;
+	}
+
+	public static Contact insertNewContactToDB(String date, String firstName, String lastName, String address,
+			String city, String state, String zip, String phoneNo, String email) {
+		String sql = String.format(
+				"INSERT INTO contacs (date_added,first_name,last_name,address,city,state,zip,phone_number,email) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s');",
+				date, firstName, lastName, address, city, state, zip, phoneNo, email);
+		Contact contact = null;
+		try (Connection connection = getConnection()) {
+			PreparedStatement preparedStatement = connection.prepareStatement(sql);
+			int result = preparedStatement.executeUpdate();
+			if (result == 1)
+				contact = new Contact(firstName, lastName, address, city, state, zip, phoneNo, email);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return contact;
+	}
+
+	
 }

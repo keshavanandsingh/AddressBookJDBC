@@ -1,8 +1,14 @@
 package com.addbook.jdbc;
 
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AddressBookService {
 	private List<Contact> contactList;
@@ -42,5 +48,12 @@ public class AddressBookService {
 		this.contactList = addressBookDBService.getContactForDateRange(startDate, endDate);
 		return contactList;
 	}
+
+	public Map<String, Integer> readContactByCityOrState() {
+		this.contactByCity=addressBookDBService.getContactByCity();
+		return contactByCity;
+	}
+
+	
 	
 }

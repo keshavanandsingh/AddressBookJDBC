@@ -6,10 +6,13 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AddressBookDBService {
 	private PreparedStatement ContactDataStatement;
@@ -131,5 +134,22 @@ public class AddressBookDBService {
 						+ "on contacts.Address_book_name=address_book_name_and_type.Address_book_name; ",
 				startDate,endDate);
 		return this.getContactDetailsUsingSqlQuery(sql);
+	}
+
+	public Map<String, Integer> getContactByCity() {
+		String sql = "SELECT city, COUNT(firstName) as count from contact_details group by city; ";
+		Map<String, Integer> contactByCityMap = new HashMap<>();
+		try (Connection connection = addressBookDBService.getConnection()) {
+			Statement statement = connection.createStatement();
+			ResultSet result = statement.executeQuery(sql);
+			while (result.next()) {
+				String city = result.getString("city");
+				Integer count = result.getInt("count");
+				contactByCityMap.put(city,count);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return contactByCityMap;
 	}
 }

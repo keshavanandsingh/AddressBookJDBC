@@ -3,6 +3,7 @@ package com.addbook.jdbc;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -49,6 +50,20 @@ class AddressBookTest {
 				"wgl", "873485", "7289472389", "srijagodishala@gmail.com");
 		boolean isSynced = AddressBookService.checkContactDetailsInSyncWithDB("Sreeja");
 		assertTrue(isSynced);
+	}
+	@Test
+	public void givenMultipeContacts_WhenAddedToDBWithMultiThreads_ShouldSyncWithDB() {
+		List<Contact> contacts = new ArrayList<>() {
+			{
+				add(new Contact("sreeja", "Godishala", "gopalpur", "hnk", "wgl", "682011",
+						"8725120000", "srijagodishala@gmail.com"));
+				add(new Contact("anjali", "varma", "bank colony", "karimanagar", "telangana", "683022", "8725120022",
+						"anjalivarma@gmail.com"));
+			}
+		};
+		AddressBookService.addNewMultipleContacts(contacts);
+		List<Contact> contactList = AddressBookService.readContactData();
+		Assert.assertEquals(7, contactList.size());
 	}
 
 }

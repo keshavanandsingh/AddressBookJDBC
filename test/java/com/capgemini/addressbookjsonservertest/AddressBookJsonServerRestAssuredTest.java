@@ -148,4 +148,26 @@ public class AddressBookJsonServerRestAssuredTest {
 		});
 		assertFalse(contactInsertionStatusCode.containsValue(false));
 	} 
+	
+	@Test
+	public void givenNewPhoneNumber_WhenUpdated_ShouldReturnCorrectStatusCode() {
+		AddressBookService addressBookService = new AddressBookService(getAddressBooks());
+		int contact_id = 3;
+		String bookName = "book1";
+		Contact contact = addressBookService.getAddressBooks()
+											.get(bookName)
+											.getContacts()
+											.stream()
+											.filter(contactObj -> contactObj.getId() == contact_id)
+											.findAny()
+											.get();
+		contact.setPhoneNumber(9904135236L);
+		String jsonString = new Gson().toJson(contact);
+		RequestSpecification request = RestAssured.given();	
+		request.header("Content-Type","application/json");
+		request.body(jsonString);
+		Response response = request.put("/" + bookName + "/" + contact_id);
+		int statusCode = response.getStatusCode();
+		assertEquals(200, statusCode);
+	}
 }

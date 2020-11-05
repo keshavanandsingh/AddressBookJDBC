@@ -30,13 +30,13 @@ public class AddressBookJsonServerRestAssuredTest {
 		RestAssured.baseURI = "http://localhost";
 		RestAssured.port = 3000;
 	} 
-	
+
 	private LinkedList<Contact> getContacts(String bookName){
 		Response response = RestAssured.get("/" + bookName);
 		Contact[] contacts = new Gson().fromJson(response.asString(), Contact[].class);
 		return new LinkedList<Contact>(Arrays.asList(contacts));
 	}
-	
+
 	private Map<String, AddressBook> getAddressBooks() {
 		Map<String, TYPE> addressBookTypeMap = new HashMap<String, AddressBook.TYPE>() {
 			{
@@ -55,7 +55,7 @@ public class AddressBookJsonServerRestAssuredTest {
 		});
 		return addressBooks;
 	}
-	
+
 	private Response addContactToAddressBook(Contact contact, String addressBookName) {
 		String jsonString = new Gson().toJson(contact);
 		RequestSpecification request = RestAssured.given();	
@@ -63,16 +63,53 @@ public class AddressBookJsonServerRestAssuredTest {
 		request.body(jsonString);
 		return request.post("/"+ addressBookName); 
 	}
-	
+
+	private Map<Integer, Boolean> addMultipleContactsToJSONServer(Map<String, Contact[]> contactsToAdd) {
+		Map<String, Boolean> contactInsertionStatus = new HashMap<String, Boolean>();
+		Map<Integer, Boolean> contactAdditionStatusCodes = new HashMap<Integer, Boolean>();
+		contactsToAdd.entrySet().forEach(entry -> {
+			String bookName = entry.getKey();
+			Contact[] contacts = entry.getValue();
+			contactInsertionStatus.put(bookName, false);
+			Runnable task = () -> {
+				for (Contact contact : contacts) {
+					Response response = addContactToAddressBook(contact, bookName);
+					int statusCode = response.getStatusCode();
+					if (statusCode == 201) {
+						String responseAsString = response.asString();
+						JsonObject jsonObject = new Gson().fromJson(responseAsString, JsonObject.class);
+						int id = jsonObject.get("id").getAsInt();
+						contact.setId(id);
+						contactAdditionStatusCodes.put(contact.hashCode(), true);
+					} else {
+						contactAdditionStatusCodes.put(contact.hashCode(), true);
+					}
+				}
+				contactInsertionStatus.put(bookName, true);
+			};
+			Thread thread = new Thread(task);
+			thread.start();
+		});
+		
+		while (contactInsertionStatus.containsValue(false)) {
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				System.out.println(e.getMessage());
+			}
+		}
+		return contactAdditionStatusCodes;
+	}
+
 	@Test
 	public void givenAddressBookJsonServer_WhenRetrieved_ShouldMatchTotalContactCount() {
 		AddressBookService addressBookService = new AddressBookService(getAddressBooks());
 		int enteries = addressBookService.getContactCount();	
 		assertEquals(3, enteries);
 	}
-	
+
 	@Test
-	public void givenAddressBook_WhenAddedToJsonServer_ShouldBeInSyncWithTheServer() {
+	public void givenAddressBook_WhenAddedToJsonServer_ShouldReturnCorrectStatusCode() {
 		AddressBookService addressBookService = new AddressBookService(getAddressBooks());
 		Contact contact = new Contact(0, "Tushar", "Chandra", "Shahibaug", "Ahmedabad", "Gujarat",
 									  "tushar.chandra@gmail.com", 386549L, 7511548678L, LocalDate.now());
@@ -87,4 +124,28 @@ public class AddressBookJsonServerRestAssuredTest {
 		int enteries = addressBookService.getContactCount();	
 		assertEquals(4, enteries);
 	}
+	
+	@Test
+	public void givenMultipleAddressBook_WhenAddedToJsonServer_ShouldReturnCorrectStatusCode() {
+		AddressBookService addressBookService = new AddressBookService(getAddressBooks());
+		Map<String, Contact[]> contactsToAdd = new HashMap<String, Contact[]>(){{
+			put("book1", new Contact[] {new Contact(0, "Vaibhavi", "Agarwal", "Andheri", "Mumbai", "Maharashtra",
+									  "vaibhavi.agarwal@gmail.com", 386549L, 7511548648L, LocalDate.now()),
+										new Contact(0, "Vedant", "Dave", "Patel Nagar", "New Delhi", "Delhi",
+											  "vedant.dave@gmail.com", 110049L, 7511548486L, LocalDate.now())});
+			put("book2", new Contact[] {new Contact(0, "Vaibhavi", "Agarwal", "Andheri", "Mumbai", "Maharashtra",
+					  "vaibhavi.agarwal@gmail.com", 386549L, 7511548648L, LocalDate.now())});
+			put("book3", new Contact[] {new Contact(0, "Vedant", "Dave", "Patel Nagar", "New Delhi", "Delhi",
+					  "vedant.dave@gmail.com", 110049L, 7511548486L, LocalDate.now())});
+		}};
+		Map<Integer, Boolean> contactInsertionStatusCode = addMultipleContactsToJSONServer(contactsToAdd);
+		contactsToAdd.entrySet().forEach(entry -> {
+			String bookName = entry.getKey();
+			Contact[] contacts = entry.getValue();
+			for(Contact contact : contacts) {
+				addressBookService.addContactToParticularAddressBook(bookName, contact, IOTYPE.REST_IO);
+			}
+		});
+		assertFalse(contactInsertionStatusCode.containsValue(false));
+	} 
 }

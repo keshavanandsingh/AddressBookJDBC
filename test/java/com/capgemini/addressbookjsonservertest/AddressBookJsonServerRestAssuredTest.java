@@ -147,6 +147,8 @@ public class AddressBookJsonServerRestAssuredTest {
 			}
 		});
 		assertFalse(contactInsertionStatusCode.containsValue(false));
+		int enteries = addressBookService.getContactCount();	
+		assertEquals(8, enteries);
 	} 
 	
 	@Test
@@ -169,5 +171,32 @@ public class AddressBookJsonServerRestAssuredTest {
 		Response response = request.put("/" + bookName + "/" + contact_id);
 		int statusCode = response.getStatusCode();
 		assertEquals(200, statusCode);
+	}
+	
+	@Test
+	public void givenAContactToDelete_WhenDeleted_ShouldMatchTheTotalCount() {
+		AddressBookService addressBookService = new AddressBookService(getAddressBooks());
+		int contact_id = 4;
+		String bookName = "book1";
+		Contact contact = addressBookService.getAddressBooks()
+											.get(bookName)
+											.getContacts()
+											.stream()
+											.filter(contactObj -> contactObj.getId() == contact_id)
+											.findAny()
+											.get();
+		RequestSpecification request = RestAssured.given();	
+		request.header("Content-Type","application/json");
+		Response response = request.delete("/" + bookName + "/" + contact_id);
+		int statusCode = response.getStatusCode();
+		assertEquals(200, statusCode);
+		
+		boolean result = addressBookService.getAddressBooks()
+										   .get(bookName)
+										   .getContacts()
+										   .remove(contact);
+		assertTrue(result);
+		int enteries = addressBookService.getContactCount();	
+		assertEquals(7, enteries);
 	}
 }
